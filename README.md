@@ -6,8 +6,10 @@ updated cooking steps.
 
 ## Demo
 
-<video src="https://github.com/Kamalpegu/FoodVibe/blob/main/22-40-25.mp4?raw=true" controls="controls" muted="muted" width="100%">
-  Your browser does not support the video tag.
+<video src="https://github.com/Kamalpegu/FoodVibe/blob/main/22-40-25.mp4?raw=true"
+       controls
+       muted
+       width="100%">
 </video>
 
 ## Features
