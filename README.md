@@ -31,24 +31,28 @@ Both modules can also be run directly for their built-in example. They require
 
 ## Run the application
 
-After completing setup, start the interactive assistant from the project root:
+After completing setup, start the backend API from the project root:
 
 ```powershell
-python .\backend\start\main.py
+python -m uvicorn backend.start.api:app --reload
 ```
 
-You can optionally provide a recipe request and fridge image:
+In another terminal, start the React frontend:
 
 ```powershell
-python .\backend\start\main.py --query "quick breakfast with eggs" --image "C:\path\to\fridge.jpg"
+cd frontend
+npm install
+npm run dev
 ```
 
-The app suggests a recipe, optionally substitutes an ingredient, extracts
-step timers, and lets you track cooking progress.
+Open the local URL printed by Vite (normally `http://127.0.0.1:5173`). The
+frontend suggests recipes from a text request or fridge photo, finds ingredient
+substitutions, tracks cooking progress, and runs visible countdowns for timed
+steps. The backend requires `GROQ_API_KEY`.
 
 ## Dependencies
 
-Install the dependencies with:
+Install the backend dependencies with:
 
 ```powershell
 python -m pip install -r requirements.txt

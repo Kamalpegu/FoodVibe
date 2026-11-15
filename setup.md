@@ -33,20 +33,38 @@ Keep this key private and do not commit `.env` files.
 
 ## Run the examples
 
-From the project root:
+From the project root, start the backend API:
 
 ```powershell
-python .\backend\start\main.py
-python .\backend\src\food_look.py
-python .\backend\src\ingredient_swap.py
+python -m uvicorn backend.start.api:app --reload
 ```
 
-The main app interactively generates a recipe, optionally substitutes an
-ingredient, shows timers found in the steps, and tracks cooking progress. You
-can also pass a query or image path:
+In another terminal, install and start the React frontend:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open the local URL printed by Vite (normally `http://127.0.0.1:5173`). The
+frontend suggests a recipe, optionally substitutes an ingredient, shows timers,
+and tracks cooking progress. Keep the backend terminal running while you use
+the app.
+
+The original command-line examples are still available from the project root:
+
+```powershell
+python .\backend\src\food_look.py
+python .\backend\src\ingredient_swap.py
+python .\backend\start\main.py
+```
+
+To run the command-line app with a request or fridge image:
 
 ```powershell
 python .\backend\start\main.py --query "quick breakfast with eggs" --image "C:\path\to\fridge.jpg"
 ```
 
-These commands make live requests to the Groq API and require a valid API key.
+All recipe and ingredient-substitution commands make live requests to the Groq
+API and require a valid API key.
