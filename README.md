@@ -6,12 +6,12 @@ updated cooking steps.
 
 ## Demo
 
-<video src="https://github.com/Kamalpegu/FoodVibe/blob/main/22-40-25.mp4?raw=true"
+[<video src="https://github.com/Kamalpegu/FoodVibe/blob/main/22-40-25.mp4?raw=true"
        controls
        muted
        width="100%">
 </video>
-
+](https://github.com/user-attachments/assets/0802f917-0b99-486c-aeb8-31d6b4bc3bb2)
 ## Features
 
 - Analyze a fridge image and/or text request to produce a structured recipe.
