@@ -297,7 +297,7 @@ function App() {
     <div className={`app-shell chat-app${activeTimer ? " timer-active" : ""}`}>
       <header className="topbar chat-topbar">
         <a className="brand" href="#" aria-label="FoodVibe home">
-          <span className="brand-mark">f.</span>
+          <img className="brand-logo" src="/foodvibe-logo.png" alt="" />
           <span>FoodVibe</span>
         </a>
         <div className="chat-status"><span className="status-dot" /> YOUR KITCHEN COMPANION</div>
@@ -312,7 +312,7 @@ function App() {
         <div className="chat-thread">
           {!recipe || !progress ? suggestions.length === 0 ? (
             <section className="welcome-message">
-              <div className="assistant-avatar">f.</div>
+              <div className="assistant-avatar"><img src="/foodvibe-logo.png" alt="" /></div>
               <div className="welcome-content">
                 <span className="message-author">FOODVIBE <span>· HERE TO HELP</span></span>
                 <h1>Hey there! What are<br className="desktop-break" /> we cooking <em>today?</em></h1>
@@ -342,7 +342,7 @@ function App() {
               </section>
 
               <section className="assistant-message" aria-live="polite">
-                <div className="assistant-avatar">f.</div>
+                <div className="assistant-avatar"><img src="/foodvibe-logo.png" alt="" /></div>
                 <div className="assistant-content">
                   <span className="message-author">FOODVIBE <span>· A FEW IDEAS FOR YOU</span></span>
                   <p className="assistant-intro">I found a few ideas for you. Pick the one you’re in the mood for, and I’ll lay out the ingredients and cooking steps.</p>
@@ -387,7 +387,7 @@ function App() {
               </section>
 
               <section className="assistant-message" aria-live="polite">
-                <div className="assistant-avatar">f.</div>
+                <div className="assistant-avatar"><img src="/foodvibe-logo.png" alt="" /></div>
                 <div className="assistant-content">
                   <span className="message-author">FOODVIBE <span>· RECIPE FOUND</span></span>
                   <p className="assistant-intro">Oh, this is going to be good. Here’s something lovely you can make:</p>
@@ -554,7 +554,7 @@ function App() {
           {error && <div className="error-banner" role="alert"><span>!</span>{error}<button onClick={() => setError("")} aria-label="Dismiss error">×</button></div>}
           {loading && (
             <div className="thinking-row" role="status">
-              <div className="assistant-avatar">f.</div>
+              <div className="assistant-avatar"><img src="/foodvibe-logo.png" alt="" /></div>
               <div className="thinking-bubble"><span className="typing-dots"><i /><i /><i /></span> Thinking up something delicious…</div>
             </div>
           )}
@@ -593,7 +593,7 @@ function App() {
             disabled={loading}
           />
           <button className="send-button" type="submit" disabled={loading || (!query.trim() && !image)} aria-label="Send message">
-            {loading ? <span className="spinner" /> : <span>↑</span>}
+            {loading ? <span className="spinner" /> : <img className="send-button-logo" src="/foodvibe-logo.png" alt="" />}
           </button>
         </form>
         <p className="composer-footnote">FoodVibe can make mistakes. Good cooking starts with common sense.</p>
