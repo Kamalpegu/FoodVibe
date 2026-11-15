@@ -11,6 +11,23 @@ updated cooking steps.
   substitute.
 - Validate model responses with Pydantic schemas.
 
+## Where AI is used
+
+FoodVibe uses Groq-hosted language models for two specific tasks:
+
+- **Recipe suggestions:** The model uses the user's text request and, when
+  provided, a fridge image to identify visible ingredients and generate recipe
+  options with ingredients and cooking instructions. The API validates the
+  returned data against Pydantic schemas before sending it to the frontend.
+- **Ingredient substitutions:** When a user requests a swap, the model suggests
+  alternatives and rewrites the affected cooking steps. Its response is also
+  schema-validated.
+
+The rest of the core flow is handled by application code: the React interface,
+API routing, recipe selection, timer extraction and countdowns, cooking
+progress, and saving/restoring the browser session. These parts do not use AI
+to make their decisions.
+
 ## Setup
 
 See [setup.md](./setup.md) for Python environment setup, dependency installation,
