@@ -6,8 +6,8 @@ updated cooking steps.
 
 ## Demo
 
-https://raw.githubusercontent.com/Kamalpegu/FoodVibe/main/22-40-25.mp4
-
+<video src="https://raw.githubusercontent.com/Kamalpegu/FoodVibe/main/22-40-25.mp4" controls="controls" style="max-width: 100%;">
+</video>
 
 ## Features
 
