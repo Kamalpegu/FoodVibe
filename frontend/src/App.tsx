@@ -297,8 +297,7 @@ function App() {
     <div className={`app-shell chat-app${activeTimer ? " timer-active" : ""}`}>
       <header className="topbar chat-topbar">
         <a className="brand" href="#" aria-label="FoodVibe home">
-          <img className="brand-logo" src="/foodvibe-logo.png" alt="" />
-          <span>FoodVibe</span>
+          <img className="brand-logo" src="/foodvibe-full-logo.png" alt="FoodVibe" />
         </a>
         <div className="chat-status"><span className="status-dot" /> YOUR KITCHEN COMPANION</div>
         {recipe ? (
@@ -570,12 +569,16 @@ function App() {
           </div>
         )}
         <form className="chat-composer" onSubmit={generateRecipe}>
-          <label className="attach-button" htmlFor="fridge-image" aria-label="Attach a fridge photo">＋</label>
+          <label className="attach-button" htmlFor="fridge-image" aria-label="Open camera or attach a fridge photo">
+            <span className="attach-desktop-label">＋</span>
+            <span className="attach-mobile-label">Open camera</span>
+          </label>
           <input
             id="fridge-image"
             className="visually-hidden"
             type="file"
             accept="image/jpeg,image/png,image/webp"
+            capture="environment"
             onChange={(event) => setImage(event.target.files?.[0] ?? null)}
           />
           <textarea
