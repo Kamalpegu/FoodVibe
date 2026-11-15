@@ -3,6 +3,7 @@
 import argparse
 import os
 import sys
+import time
 from pathlib import Path
 
 
@@ -109,8 +110,31 @@ def _offer_ingredient_swap(recipe: dict, resolve_missing_ingredient) -> list[dic
     return result["updated_steps"]
 
 
-def _track_cooking_steps(steps: list[dict], initialize_step_tracker, mark_step_status) -> None:
+def _run_countdown(duration_seconds: int) -> None:
+    deadline = time.monotonic() + duration_seconds
+    remaining = duration_seconds
+
+    while remaining > 0:
+        minutes, seconds = divmod(remaining, 60)
+        print(f"\rTimer: {minutes:02d}:{seconds:02d}", end="", flush=True)
+        time.sleep(min(1, max(0, deadline - time.monotonic())))
+        remaining = max(0, int(deadline - time.monotonic() + 0.999))
+
+    print("\rTimer finished. Proceed to the next step.      ")
+
+
+def _track_cooking_steps(
+    steps: list[dict],
+    initialize_step_tracker,
+    mark_step_status,
+    timed_steps: list[dict] | None = None,
+) -> None:
     state = initialize_step_tracker(steps)
+    timers_by_step = {
+        timer["stepNumber"]: timer
+        for timer in (timed_steps or [])
+        if timer["has_timer"] and timer["duration_seconds"] > 0
+    }
     print("\nCooking progress:")
 
     while True:
@@ -127,7 +151,8 @@ def _track_cooking_steps(steps: list[dict], initialize_step_tracker, mark_step_s
             return
 
         command = input(
-            "Enter a step number to complete, 'undo <number>' to reopen it, or 'q' to quit: "
+            "Enter a step number to start/complete it, 'undo <number>' to reopen it, "
+            "or 'q' to quit: "
         ).strip().lower()
         if command in {"q", "quit", "exit"}:
             return
@@ -143,6 +168,16 @@ def _track_cooking_steps(steps: list[dict], initialize_step_tracker, mark_step_s
             continue
 
         try:
+            step_number = int(parts[0])
+            target_step = next(
+                (step for step in state["steps"] if step["stepNumber"] == step_number),
+                None,
+            )
+            if completed and target_step and not target_step["completed"]:
+                timer = timers_by_step.get(step_number)
+                if timer:
+                    print(f"Starting {timer['label']} timer for step {step_number}.")
+                    _run_countdown(timer["duration_seconds"])
             state = mark_step_status(state["steps"], int(parts[0]), completed=completed)
         except ValueError as error:
             print(f"{error}\n")
@@ -175,13 +210,18 @@ def run_app(query: str | None = None, image_path: str | None = None) -> None:
     timed_steps = extract_timers_from_steps(cooking_steps)
     timers = [step["timer"] for step in timed_steps if step["timer"]["has_timer"]]
     if timers:
-        print("\nSuggested timers:")
+        print("\nTimers detected in the recipe steps:")
         for timer in timers:
             print(f"  Step {timer['stepNumber']}: {timer['label']}")
     else:
         print("\nNo timed steps were found in this recipe.")
 
-    _track_cooking_steps(cooking_steps, initialize_step_tracker, mark_step_status)
+    _track_cooking_steps(
+        cooking_steps,
+        initialize_step_tracker,
+        mark_step_status,
+        timed_steps=[step["timer"] for step in timed_steps],
+    )
 
 
 def main() -> None:
