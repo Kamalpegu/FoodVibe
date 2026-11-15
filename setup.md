@@ -47,10 +47,32 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite (normally `http://127.0.0.1:5173`). The
-frontend suggests a recipe, optionally substitutes an ingredient, shows timers,
-and tracks cooking progress. Keep the backend terminal running while you use
-the app.
+Open the local URL printed by Vite (normally `http://localhost:5173`). The
+frontend suggests three recipes. Choose one to see its ingredients and
+step-by-step cooking route, then optionally substitute ingredients, use timers,
+and track progress. Keep the backend terminal running while you use the app.
+Vite proxies API requests to the backend. To try the app on a phone, open the
+Network URL printed by Vite while the phone and computer are on the same Wi-Fi.
+
+## Deployment and concurrency
+
+The API allows up to 8 concurrent Groq requests per worker by default. Busy
+requests beyond that limit receive HTTP 503 with a short retry hint. Configure
+the limit with `FOODVIBE_LLM_CONCURRENCY`; it applies independently in each
+worker process, so the total is `workers × replicas × limit`. Tune it against
+your Groq plan and host rather than raising it blindly.
+
+For a single-host deployment, omit `--reload` and set a worker count suitable
+for the machine:
+
+```powershell
+python -m uvicorn backend.start.api:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+If frontend and backend use different origins, set `FOODVIBE_CORS_ORIGINS` to a
+comma-separated list of trusted frontend origins. Keep `GROQ_API_KEY` in the
+hosting provider's secrets manager. This does not remove Groq quota or hosting
+limits; monitor request latency and HTTP 503/502 responses as usage grows.
 
 The original command-line examples are still available from the project root:
 

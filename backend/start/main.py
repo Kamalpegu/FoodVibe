@@ -1,4 +1,4 @@
-"""Interactive command-line app for the FlamPpo recipe assistant."""
+"""Interactive command-line app for the FoodVibe recipe assistant."""
 
 import argparse
 import os
@@ -225,7 +225,7 @@ def run_app(query: str | None = None, image_path: str | None = None) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="FlamPpo recipe and cooking assistant.")
+    parser = argparse.ArgumentParser(description="FoodVibe recipe and cooking assistant.")
     parser.add_argument("--query", help="What you would like to cook")
     parser.add_argument("--image", help="Path to a fridge image to analyze")
     args = parser.parse_args()

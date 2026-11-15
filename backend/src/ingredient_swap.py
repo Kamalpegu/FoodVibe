@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"), timeout=60.0, max_retries=1)
 
 # --- Output Data Schemas ---
 class AlternativeOption(BaseModel):
@@ -53,7 +53,8 @@ def resolve_missing_ingredient(
     )
 
     preference_text = (
-        f"The user specifically asked to use '{user_preferred_swap}' if possible."
+        f"The user selected '{user_preferred_swap}' as the substitute. Use this exact ingredient "
+        "as 'recommended_swap' and rewrite every updated step to use it."
         if user_preferred_swap.strip()
         else "Pick the most common household/fridge substitute as 'recommended_swap'."
     )
@@ -67,7 +68,7 @@ def resolve_missing_ingredient(
         "Tasks:\n"
         "1. Provide 2-3 realistic substitutes in 'alternatives' with exact converted numeric 'quantity' and 'unit' "
         "(prioritizing items already in the user's fridge if suitable).\n"
-        "2. Set 'recommended_swap' to the best replacement (or the user's preferred swap if valid).\n"
+        "2. Set 'recommended_swap' to the exact user-selected substitute when one was provided; otherwise choose the best replacement.\n"
         "3. Rewrite 'updated_steps' so every mention or technique involving the missing ingredient "
         "is adjusted for the 'recommended_swap'.\n\n"
         "Respond strictly with valid JSON matching this schema:\n"
