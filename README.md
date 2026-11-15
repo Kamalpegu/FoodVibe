@@ -4,6 +4,11 @@ FoodVibe is a Python food assistant that uses Groq models to suggest recipes fro
 a text query or fridge photo, and recommend ingredient substitutions with
 updated cooking steps.
 
+## Demo
+
+https://raw.githubusercontent.com/Kamalpegu/FoodVibe/main/22-40-25.mp4
+
+
 ## Features
 
 - Analyze a fridge image and/or text request to produce a structured recipe.
