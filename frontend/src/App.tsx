@@ -73,6 +73,71 @@ type SubstituteResult = {
   };
 };
 
+type SavedSession = {
+  version: 1;
+  query: string;
+  recipe: Recipe | null;
+  suggestions: RecipeChoice[];
+  progress: Progress | null;
+  lastPrompt: string;
+  missingIngredient: string;
+  preferredSwap: string;
+  fridgeItems: string;
+  substitution: SubstituteResult | null;
+  activeTimer: { stepNumber: number; endsAt: number } | null;
+  timerFinished: boolean;
+};
+
+const SESSION_STORAGE_KEY = "foodvibe-session-v1";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isSavedSession(value: unknown): value is SavedSession {
+  if (!isRecord(value) || value.version !== 1) return false;
+  const activeTimer = value.activeTimer;
+  return (
+    typeof value.query === "string" &&
+    (value.recipe === null || isRecord(value.recipe)) &&
+    Array.isArray(value.suggestions) &&
+    (value.progress === null || isRecord(value.progress)) &&
+    typeof value.lastPrompt === "string" &&
+    typeof value.missingIngredient === "string" &&
+    typeof value.preferredSwap === "string" &&
+    typeof value.fridgeItems === "string" &&
+    (value.substitution === null || isRecord(value.substitution)) &&
+    (activeTimer === null ||
+      (isRecord(activeTimer) &&
+        typeof activeTimer.stepNumber === "number" &&
+        typeof activeTimer.endsAt === "number")) &&
+    typeof value.timerFinished === "boolean"
+  );
+}
+
+function loadSavedSession(): { session: SavedSession | null; error: string } {
+  try {
+    const stored = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!stored) return { session: null, error: "" };
+
+    const parsed: unknown = JSON.parse(stored);
+    if (!isSavedSession(parsed)) {
+      window.localStorage.removeItem(SESSION_STORAGE_KEY);
+      return {
+        session: null,
+        error: "The saved session was invalid and has been cleared.",
+      };
+    }
+    return { session: parsed, error: "" };
+  } catch (storageError) {
+    console.error("Could not restore the saved FoodVibe session.", storageError);
+    return {
+      session: null,
+      error: "Could not restore the saved session. Check your browser storage settings.",
+    };
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
@@ -95,29 +160,75 @@ function formatTime(seconds: number): string {
 }
 
 function App() {
-  const [query, setQuery] = useState("");
+  const [restoreResult] = useState(loadSavedSession);
+  const savedSession = restoreResult.session;
+  const [query, setQuery] = useState(savedSession?.query ?? "");
   const [image, setImage] = useState<File | null>(null);
   const [chatImage, setChatImage] = useState<File | null>(null);
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [suggestions, setSuggestions] = useState<RecipeChoice[]>([]);
-  const [progress, setProgress] = useState<Progress | null>(null);
-  const [lastPrompt, setLastPrompt] = useState("");
+  const [recipe, setRecipe] = useState<Recipe | null>(savedSession?.recipe ?? null);
+  const [suggestions, setSuggestions] = useState<RecipeChoice[]>(savedSession?.suggestions ?? []);
+  const [progress, setProgress] = useState<Progress | null>(savedSession?.progress ?? null);
+  const [lastPrompt, setLastPrompt] = useState(savedSession?.lastPrompt ?? "");
   const [loading, setLoading] = useState(false);
   const [swapping, setSwapping] = useState(false);
   const [progressBusy, setProgressBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [missingIngredient, setMissingIngredient] = useState("");
-  const [preferredSwap, setPreferredSwap] = useState("");
-  const [fridgeItems, setFridgeItems] = useState("");
-  const [substitution, setSubstitution] = useState<SubstituteResult | null>(null);
+  const [error, setError] = useState(restoreResult.error);
+  const [missingIngredient, setMissingIngredient] = useState(savedSession?.missingIngredient ?? "");
+  const [preferredSwap, setPreferredSwap] = useState(savedSession?.preferredSwap ?? "");
+  const [fridgeItems, setFridgeItems] = useState(savedSession?.fridgeItems ?? "");
+  const [substitution, setSubstitution] = useState<SubstituteResult | null>(savedSession?.substitution ?? null);
   const [selectedSwap, setSelectedSwap] = useState("");
-  const [activeTimer, setActiveTimer] = useState<{ stepNumber: number; endsAt: number } | null>(null);
-  const [secondsLeft, setSecondsLeft] = useState(0);
-  const [timerFinished, setTimerFinished] = useState(false);
+  const [activeTimer, setActiveTimer] = useState(savedSession?.activeTimer ?? null);
+  const [secondsLeft, setSecondsLeft] = useState(
+    savedSession?.activeTimer
+      ? Math.max(0, Math.ceil((savedSession.activeTimer.endsAt - Date.now()) / 1000))
+      : 0,
+  );
+  const [timerFinished, setTimerFinished] = useState(savedSession?.timerFinished ?? false);
   const cookingMapRef = useRef<HTMLElement>(null);
 
   const imagePreview = useMemo(() => (image ? URL.createObjectURL(image) : ""), [image]);
   const chatImagePreview = useMemo(() => (chatImage ? URL.createObjectURL(chatImage) : ""), [chatImage]);
+
+  useEffect(() => {
+    try {
+      if (!query && !recipe && suggestions.length === 0 && !lastPrompt) {
+        window.localStorage.removeItem(SESSION_STORAGE_KEY);
+        return;
+      }
+
+      const session: SavedSession = {
+        version: 1,
+        query,
+        recipe,
+        suggestions,
+        progress,
+        lastPrompt,
+        missingIngredient,
+        preferredSwap,
+        fridgeItems,
+        substitution,
+        activeTimer,
+        timerFinished,
+      };
+      window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+    } catch (storageError) {
+      console.error("Could not save the FoodVibe session.", storageError);
+      setError("Could not save your session. Check available browser storage.");
+    }
+  }, [
+    activeTimer,
+    fridgeItems,
+    lastPrompt,
+    missingIngredient,
+    preferredSwap,
+    progress,
+    query,
+    recipe,
+    suggestions,
+    substitution,
+    timerFinished,
+  ]);
 
   useEffect(() => {
     if (!imagePreview) return;
@@ -277,6 +388,8 @@ function App() {
   }
 
   function resetChat() {
+    setQuery("");
+    setImage(null);
     setRecipe(null);
     setSuggestions([]);
     setProgress(null);
@@ -285,6 +398,9 @@ function App() {
     setSubstitution(null);
     setActiveTimer(null);
     setTimerFinished(false);
+    setMissingIngredient("");
+    setPreferredSwap("");
+    setFridgeItems("");
     setError("");
   }
 
